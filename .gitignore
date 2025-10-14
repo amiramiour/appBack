@@ -1,0 +1,24 @@
+# Node.js dependencies
+api/node_modules/
+
+# Logs
+logs/
+*.log
+
+# Environment variables
+.env
+
+# Build outputs
+/dist
+/build
+/db
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE settings
+.idea/
+.vscode/
+node_modules
+
+
