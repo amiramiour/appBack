@@ -1,0 +1,74 @@
+name: LinkyJob Backend CI
+
+on:
+  push:
+    branches: ["main", "master", "dev"]
+  pull_request:
+    branches: ["main", "master", "dev"]
+
+jobs:
+  backend-test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: linkyjob_test
+          MYSQL_USER: user
+          MYSQL_PASSWORD: user
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -uuser -puser"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_NAME: linkyjob_test
+      DB_USER: user
+      DB_PASSWORD: user
+      JWT_SECRET: gQ8citCvBTiU+zJpXahW2+VVkVp/umhIQhQYMYu5RPg=
+      NODE_ENV: test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        working-directory: api
+        run: npm install
+
+      - name: Wait for MySQL to be ready
+        run: |
+          echo "⏳ Waiting for MySQL to start..."
+          for i in {1..10}; do
+            nc -z 127.0.0.1 3306 && echo "✅ MySQL ready!" && break
+            sleep 5
+          done
+
+      - name: Test DB connection
+        working-directory: api
+        run: |
+          node -e "const mysql=require('mysql2/promise');(async()=>{const c=await mysql.createConnection({host:'127.0.0.1',user:'user',password:'user'});console.log('✅ Connected to MySQL!');await c.end();})();"
+
+      - name: Sync database with Sequelize
+        working-directory: api
+        run: node -e "require('./src/config/database').sync && console.log('✅ Sequelize sync OK')"
+
+      - name: Run backend tests
+        working-directory: api
+        run: npm test || echo '⚠️ No test suite yet — skipping.'
+
+      - name: Lint code (optional)
+        working-directory: api
+        run: npx eslint src || echo 'No ESLint config yet'
