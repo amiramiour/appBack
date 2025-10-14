@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  node:
+    image: node:lts-slim
+    working_dir: /app
+    env_file:
+      - .env   # charge toutes les variables du .env racine
+    command: /bin/sh -c 'npm install && npm run dev'
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./api:/app   # monte ton code
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    restart: always
+    healthcheck:
+      interval: 30s
+      retries: 3
+      test: ["CMD", "mysqladmin", "ping", "-h", "db"]
+      timeout: 30s
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./db:/var/lib/mysql
+
+  pma:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - '8081:80'
+    restart: always
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_USER: ${DB_USER}
+      PMA_PASSWORD: ${DB_PASSWORD}
+      PMA_ARBITRARY: 1
