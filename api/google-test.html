@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="google-signin-client_id" content="359490063469-9uf0v460gs9l6jlbkhp317j637k03g73.apps.googleusercontent.com">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+  </head>
+  <body>
+    <h2>Connexion Google Test (LinkyJob)</h2>
+    <div id="g_id_onload"
+         data-client_id="359490063469-9uf0v460gs9l6jlbkhp317j637k03g73.apps.googleusercontent.com"
+         data-context="signin"
+         data-ux_mode="popup"
+         data-callback="handleCredentialResponse">
+    </div>
+    <div class="g_id_signin" data-type="standard"></div>
+
+    <script>
+      function handleCredentialResponse(response) {
+        console.log(" ID Token :", response.credential);
+        alert("Token généré ! Ouvre la console (F12) pour le copier.");
+      }
+    </script>
+  </body>
+</html>
