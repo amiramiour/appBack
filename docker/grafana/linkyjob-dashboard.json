@@ -1,0 +1,89 @@
+{
+  "id": null,
+  "title": "LinkyJob API Dashboard",
+  "tags": ["linkyjob", "performance"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Total Requests",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(http_requests_total)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Requests per Second (RPS)",
+      "gridPos": { "x": 6, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(http_requests_total[1m])",
+          "legendFormat": "{{method}} {{route}}",
+          "refId": "A"
+        }
+      ],
+      "lines": true,
+      "linewidth": 2
+    },
+    {
+      "type": "graph",
+      "title": "p95 Request Duration (ms)",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket[5m])) by (le, route))",
+          "legendFormat": "{{route}}",
+          "refId": "A"
+        }
+      ],
+      "lines": true,
+      "linewidth": 2
+    },
+    {
+      "type": "graph",
+      "title": "Average Request Duration (ms)",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_request_duration_ms_sum[5m])) / sum(rate(http_request_duration_ms_count[5m]))",
+          "refId": "A"
+        }
+      ],
+      "lines": true
+    },
+    {
+      "type": "graph",
+      "title": "5xx Error Rate (%)",
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "100 * (sum(rate(http_requests_total{status_code=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])))",
+          "refId": "A"
+        }
+      ],
+      "lines": true
+    },
+    {
+      "type": "table",
+      "title": "Requests by Endpoint",
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum by (method, route, status_code) (http_requests_total)",
+          "refId": "A"
+        }
+      ],
+      "styles": [
+        { "pattern": "Time", "type": "hidden" },
+        { "pattern": "Value", "type": "number", "unit": "short" }
+      ]
+    }
+  ]
+}

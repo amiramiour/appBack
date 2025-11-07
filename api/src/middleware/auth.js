@@ -7,7 +7,7 @@ exports.requireAuth = (req, res, next) => {
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = { id: payload.sub, role: payload.role }; // ✅ standard JWT
+    req.user = { id: payload.sub, role: payload.role }; //  standard JWT
     next();
   } catch (err) {
     console.error("JWT verification failed:", err.message);

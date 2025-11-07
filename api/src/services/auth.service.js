@@ -1,7 +1,8 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
-
+const crypto = require("crypto");
+const { sendPasswordResetEmail } = require("./email.service");
 exports.register = async (data) => {
   try {
     const { email, password, role } = data;
@@ -51,4 +52,42 @@ exports.login = async (email, password) => {
   } catch (error) {
     throw new Error(error.message);
   }
+};
+
+
+
+exports.requestPasswordReset = async (email) => {
+  const user = await User.findOne({ where: { email } });
+  if (!user) throw new Error("Utilisateur introuvable");
+
+  const token = crypto.randomBytes(32).toString("hex");
+  const expiry = new Date(Date.now() + 3600000); // 1h
+
+  user.resetToken = token;
+  user.resetTokenExpiry = expiry;
+  await user.save();
+
+  const resetLink = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+  await sendPasswordResetEmail(email, resetLink);
+
+  return { message: "Email de réinitialisation envoyé" };
+};
+
+exports.resetPassword = async (token, newPassword) => {
+  const user = await User.findOne({
+    where: {
+      resetToken: token,
+      resetTokenExpiry: { [require("sequelize").Op.gt]: new Date() },
+    },
+  });
+
+  if (!user) throw new Error("Lien de réinitialisation invalide ou expiré");
+
+  const hashed = await bcrypt.hash(newPassword, 10);
+  user.password = hashed;
+  user.resetToken = null;
+  user.resetTokenExpiry = null;
+  await user.save();
+
+  return { message: "Mot de passe mis à jour avec succès" };
 };

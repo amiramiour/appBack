@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 5s  # fréquence de collecte des métriques
+
+scrape_configs:
+  - job_name: "linkyjob-node"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["node:3000"]  # cible ton service node (port exposé)
