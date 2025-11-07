@@ -1,28 +1,31 @@
-version: '3.8'
+version: "3.8"
 
 services:
   node:
     image: node:lts-slim
+    container_name: app-node
     working_dir: /app
     env_file:
-      - .env   # charge toutes les variables du .env racine
-    command: /bin/sh -c 'npm install && npm run dev'
+      - .env
+    command: /bin/sh -c "npm install && npm run dev"
     ports:
-      - '3000:3000'
+      - "3000:3000"
     volumes:
-      - ./api:/app   # monte ton code
+      - ./api:/app
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/metrics"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   db:
     image: mysql:8.0
+    container_name: app-db
     restart: always
-    healthcheck:
-      interval: 30s
-      retries: 3
-      test: ["CMD", "mysqladmin", "ping", "-h", "db"]
-      timeout: 30s
     environment:
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
@@ -30,12 +33,19 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     volumes:
       - ./db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   pma:
     image: phpmyadmin/phpmyadmin
-    ports:
-      - '8081:80'
+    container_name: app-pma
     restart: always
+    ports:
+      - "8081:80"
     depends_on:
       - db
     environment:
@@ -43,3 +53,46 @@ services:
       PMA_USER: ${DB_USER}
       PMA_PASSWORD: ${DB_PASSWORD}
       PMA_ARBITRARY: 1
+
+  k6:
+    image: grafana/k6:latest
+    container_name: app-k6
+    working_dir: /scripts
+    volumes:
+      - ./api/tests/perf:/scripts
+    depends_on:
+      node:
+        condition: service_healthy
+    entrypoint: ["tail", "-f", "/dev/null"]
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: app-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - node
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: app-grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+volumes:
+  grafana_data:

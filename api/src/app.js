@@ -3,33 +3,89 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
 const sequelize = require("./config/database");
+const logger = require("./config/logger"); // 🟢 ton logger Pino
+const { register, httpRequestCounter, httpRequestDuration } = require("./config/metrics"); // 🟢 métriques
 const authRoutes = require("./routes/auth.routes");
 const meRoutes = require("./routes/me.routes");
 const missionRoutes = require("./routes/mission.routes");
 const documentRoutes = require("./routes/document.routes");
 
-
-//  Charger le fichier .env AVANT tout
+//  Charger le fichier .env avant tout
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 const app = express();
 
+// Middlewares globaux
 app.use(cors());
 app.use(express.json());
 
+//  Middleware de logs Pino (requêtes HTTP)
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    logger.info({
+      method: req.method,
+      url: req.originalUrl,
+      status: res.statusCode,
+      duration: `${duration}ms`,
+    });
+  });
+  next();
+});
+
+//  Middleware de métriques Prometheus
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    httpRequestCounter.inc({
+      method: req.method,
+      route: req.path,
+      status_code: res.statusCode,
+    });
+    httpRequestDuration.observe(
+      { method: req.method, route: req.path, status_code: res.statusCode },
+      duration
+    );
+  });
+  next();
+});
+
+//  Route Prometheus
+app.get("/metrics", async (req, res) => {
+  try {
+    res.set("Content-Type", register.contentType);
+    res.end(await register.metrics());
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+// Routes principales
 app.use("/auth", authRoutes);
 app.use("/me", meRoutes);
 app.use("/missions", missionRoutes);
 app.use("/documents", documentRoutes);
 
+//  Route test simple
+app.get("/", (req, res) => {
+  logger.info(" API LinkyJob running");
+  res.json({ message: "LinkyJob API running 🚀" });
+});
+//test 5xx
+app.get("/error", (req, res) => {
+  throw new Error("Test internal server error");
+});
 
+// Connexion Sequelize
 sequelize
-  .sync()
+  .sync({ alter: true })
   .then(() => {
-    console.log("Database connected & synced");
+    logger.info("Database connected & synced");
   })
   .catch((err) => {
-    console.error("Database connection failed:", err);
+    logger.error("Database connection failed:", err);
   });
 
 module.exports = app;
