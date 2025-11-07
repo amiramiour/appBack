@@ -14,15 +14,12 @@ export const options = {
   },
 };
 
-//  Utilitaire pour générer un email unique
 function randomEmail() {
   const id = Math.floor(Math.random() * 100000);
   return `student${id}@test.com`;
 }
 
-//  SETUP — exécuté une seule fois avant le test
 export function setup() {
-  // 1️ Inscription d’un nouvel utilisateur étudiant
   const registerRes = http.post(
     "http://node:3000/auth/register",
     JSON.stringify({
@@ -41,7 +38,6 @@ export function setup() {
 
   check(registerRes, { "register succeeded": (r) => r.status === 201 || r.status === 400 });
 
-  // 2️ Connexion de ce même utilisateur
   const regBody = JSON.parse(registerRes.body);
   const email = regBody?.user?.email || "student@test.com";
 
@@ -57,19 +53,15 @@ export function setup() {
   return { token };
 }
 
-//  EXECUTION — exécutée par chaque VU
 export default function (data) {
   const authHeaders = { headers: { Authorization: `Bearer ${data.token}` } };
 
-  // 🔹 1. Consultation des missions
   const res1 = http.get("http://node:3000/missions", authHeaders);
   check(res1, { "missions 200": (r) => r.status === 200 });
 
-  // 🔹 2. Consultation du profil utilisateur
   const res2 = http.get("http://node:3000/me", authHeaders);
   check(res2, { "profile 200": (r) => r.status === 200 || r.status === 404 });
 
-  // 🔹 3. Appel de la route /documents/presigned-url
   const res3 = http.get("http://node:3000/documents/presigned-url?type=titre_sejour", authHeaders);
   check(res3, { "presigned-url 200": (r) => r.status === 200 });
 

@@ -2,11 +2,11 @@ import http from "k6/http";
 import { check, sleep } from "k6";
 
 export const options = {
-  vus: 5,              // 5 utilisateurs simultanés
-  duration: "30s",     // pendant 30 secondes
+  vus: 5,              
+  duration: "30s",    
   thresholds: {
-    http_req_failed: ["rate<0.01"], // moins de 1 % d’erreurs
-    http_req_duration: ["p(95)<300"], // 95 % des requêtes < 300 ms
+    http_req_failed: ["rate<0.01"], 
+    http_req_duration: ["p(95)<300"], 
   },
 };
 
