@@ -21,7 +21,7 @@ User.init(
     companyType: DataTypes.ENUM("SARL", "SAS", "AUTO_ENTREPRENEUR"),
     companyId: DataTypes.STRING,
     address: DataTypes.STRING,
-    legalEmail: DataTypes.STRING,
+
     resetToken: DataTypes.STRING,
     resetTokenExpiry: DataTypes.DATE,
   },
