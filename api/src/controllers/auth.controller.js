@@ -1,5 +1,6 @@
 const authService = require("../services/auth.service");
 const googleAuthService = require("../services/googleAuth.service");
+const User = require("../models/user.model");  
 
 exports.register = async (req, res) => {
   try {
@@ -54,3 +55,25 @@ exports.resetPassword = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+
+
+exports.uploadPhoto = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "Aucune image envoyée" });
+
+    const user = await User.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ error: "Utilisateur introuvable" });
+
+    user.photoUrl = req.file.path;
+    await user.save();
+
+    res.json({
+      message: "Photo mise à jour",
+      photoUrl: user.photoUrl,
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
