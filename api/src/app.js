@@ -72,7 +72,7 @@ app.use("/uploads", express.static("uploads"));
 //  Route test simple
 app.get("/", (req, res) => {
   logger.info(" API LinkyJob running");
-  res.json({ message: "LinkyJob API running 🚀" });
+  res.json({ message: "LinkyJob API running " });
 });
 //test 5xx
 app.get("/error", (req, res) => {
