@@ -9,6 +9,11 @@ User.init(
     role: { type: DataTypes.ENUM("student", "company"), allowNull: false },
     email: { type: DataTypes.STRING, allowNull: false, unique: true },
     password: { type: DataTypes.STRING, allowNull: false },
+    photoUrl: {
+  type: DataTypes.STRING,
+  defaultValue: "uploads/default-avatar.png"
+},
+
     // Étudiant
     firstName: DataTypes.STRING,
     lastName: DataTypes.STRING,
