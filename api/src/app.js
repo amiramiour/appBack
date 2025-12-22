@@ -67,6 +67,7 @@ app.use("/auth", authRoutes);
 app.use("/me", meRoutes);
 app.use("/missions", missionRoutes);
 app.use("/documents", documentRoutes);
+app.use("/uploads", express.static("uploads"));
 
 //  Route test simple
 app.get("/", (req, res) => {
