@@ -9,6 +9,7 @@ const authRoutes = require("./routes/auth.routes");
 const meRoutes = require("./routes/me.routes");
 const missionRoutes = require("./routes/mission.routes");
 const documentRoutes = require("./routes/document.routes");
+require("./models"); 
 
 //  Charger le fichier .env avant tout
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
