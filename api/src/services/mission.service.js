@@ -1,4 +1,5 @@
 const Mission = require("../models/mission.model");
+const User = require("../models/user.model");
 
 exports.createMission = async (data, employerId) => {
   return await Mission.create({
@@ -20,7 +21,17 @@ exports.createMission = async (data, employerId) => {
   });
 };
 exports.getAllMissions = async () => {
-  return await Mission.findAll({ where: { status: "active" } });
+  return await Mission.findAll({
+    where: { status: "active" },
+    include: [
+      {
+        model: User,
+        as: "employer", //  doit matcher l'association
+        attributes: ["id", "companyName", "photoUrl"],
+      },
+    ],
+    order: [["startDate", "DESC"]],
+  });
 };
 
 exports.getMyMissions = async (employerId) => {
