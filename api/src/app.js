@@ -9,6 +9,8 @@ const authRoutes = require("./routes/auth.routes");
 const meRoutes = require("./routes/me.routes");
 const missionRoutes = require("./routes/mission.routes");
 const documentRoutes = require("./routes/document.routes");
+const studentRoutes = require("./routes/student.routes");
+
 require("./models"); 
 
 //  Charger le fichier .env avant tout
@@ -19,6 +21,7 @@ const app = express();
 // Middlewares globaux
 app.use(cors());
 app.use(express.json());
+app.use("/students", studentRoutes);
 
 //  Middleware de logs Pino (requêtes HTTP)
 app.use((req, res, next) => {
