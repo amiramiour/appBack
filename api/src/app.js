@@ -3,13 +3,14 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
 const sequelize = require("./config/database");
-const logger = require("./config/logger"); // 🟢 ton logger Pino
-const { register, httpRequestCounter, httpRequestDuration } = require("./config/metrics"); // 🟢 métriques
+const logger = require("./config/logger"); //  logger Pino
+const { register, httpRequestCounter, httpRequestDuration } = require("./config/metrics"); //  métriques
 const authRoutes = require("./routes/auth.routes");
 const meRoutes = require("./routes/me.routes");
 const missionRoutes = require("./routes/mission.routes");
 const documentRoutes = require("./routes/document.routes");
 const studentRoutes = require("./routes/student.routes");
+const candidatureRoutes = require("./routes/candidature.routes");
 
 require("./models"); 
 
@@ -82,7 +83,7 @@ app.get("/", (req, res) => {
 app.get("/error", (req, res) => {
   throw new Error("Test internal server error");
 });
-
+app.use("/api/candidatures", candidatureRoutes);
 // Connexion Sequelize
 sequelize
   .sync({ alter: true })
