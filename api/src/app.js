@@ -11,7 +11,7 @@ const missionRoutes = require("./routes/mission.routes");
 const documentRoutes = require("./routes/document.routes");
 const studentRoutes = require("./routes/student.routes");
 const candidatureRoutes = require("./routes/candidature.routes");
-
+const studentProfileRoutes = require("./routes/studentProfile.routes");
 require("./models"); 
 
 //  Charger le fichier .env avant tout
@@ -23,6 +23,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/students", studentRoutes);
+app.use("/student-profile", studentProfileRoutes);
 
 //  Middleware de logs Pino (requêtes HTTP)
 app.use((req, res, next) => {
