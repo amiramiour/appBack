@@ -1,6 +1,7 @@
 const Mission = require("./mission.model");
 const User = require("./user.model");
 const Candidature = require("./candidature.model");
+const StudentProfile = require("./studentProfile.model");
 
 /* =====================================================
    ASSOCIATIONS
@@ -36,6 +37,17 @@ User.hasMany(Candidature, {
 
 Candidature.belongsTo(User, {
   foreignKey: "studentId",
+  as: "student",
+});
+// Un étudiant a un profil étendu
+User.hasOne(StudentProfile, {
+  foreignKey: "userId",
+  as: "studentProfile",
+});
+
+// Le profil appartient à un utilisateur
+StudentProfile.belongsTo(User, {
+  foreignKey: "userId",
   as: "student",
 });
 
