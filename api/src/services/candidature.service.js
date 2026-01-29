@@ -115,3 +115,21 @@ exports.cancelCandidature = async (id, studentId) => {
   return candidature;
 };
 
+exports.getCompanyCandidatures = async (employerId) => {
+  return await Candidature.findAll({
+    include: [
+      {
+        model: Mission,
+        as: "mission",
+        where: { employerId },
+        attributes: ["id", "title"]
+      },
+      {
+        model: User,
+        as: "student",
+        attributes: ["id", "firstName", "lastName", "photoUrl", "training"]
+      }
+    ],
+    order: [["createdAt", "DESC"]],
+  });
+};
