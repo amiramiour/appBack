@@ -6,7 +6,12 @@ exports.getOrCreateProfile = async (userId) => {
     defaults: { userId },
   });
 
-  return profile;
+  if (profile.missions_recherchees) {
+  profile.missions_recherchees = JSON.parse(profile.missions_recherchees);
+}
+
+return profile;
+
 };
 
 exports.updateProfile = async (userId, data) => {
@@ -22,6 +27,9 @@ exports.updateProfile = async (userId, data) => {
     competences: data.competences,
     disponibilites: data.disponibilites,
     nationalites: data.nationalites,
+    missions_recherchees: data.missions_recherchees
+    ? JSON.stringify(data.missions_recherchees)
+    : null,
   });
 
   return profile;

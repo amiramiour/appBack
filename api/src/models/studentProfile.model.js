@@ -24,6 +24,11 @@ StudentProfile.init(
     langues_parlees: {
       type: DataTypes.STRING,
     },
+    missions_recherchees: {
+  type: DataTypes.TEXT,
+  allowNull: true,
+},
+
 
     competences: {
       type: DataTypes.TEXT,
