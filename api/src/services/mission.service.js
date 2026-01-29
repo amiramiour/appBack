@@ -44,3 +44,6 @@ exports.deleteMission = async (missionId, employerId) => {
   await mission.destroy();
   return { message: "Mission supprimée avec succès" };
 };
+exports.getMissionById = async (id) => {
+  return await Mission.findByPk(id);
+};
