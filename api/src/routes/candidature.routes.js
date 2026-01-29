@@ -13,5 +13,10 @@ router.post("/cancel/:id", requireAuth, controller.cancel);
 router.get("/mission/:missionId", requireAuth, controller.missionCandidatures);
 router.post("/accept/:id", requireAuth, controller.accept);
 router.post("/reject/:id", requireAuth, controller.reject);
+router.get(
+  "/company",
+  requireAuth,
+  controller.companyCandidatures
+);
 
 module.exports = router;
