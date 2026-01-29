@@ -9,5 +9,6 @@ router.post("/confirm", requireAuth, controller.confirmUpload);
 router.get("/my", requireAuth, controller.myDocuments);
 router.get("/kyc-status", requireAuth, controller.kycStatus);
 router.patch("/:id/status", requireAuth, controller.updateStatus);
+router.post("/submit", requireAuth, controller.submitDossier);
 
 module.exports = router;
