@@ -6,7 +6,7 @@ const router = express.Router();
 
 // accessible à tous
 router.get("/", controller.list);
-
+router.get("/:id", controller.getById);
 // protégées
 router.post("/", requireAuth, controller.create);
 router.get("/my", requireAuth, controller.myMissions);
