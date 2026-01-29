@@ -26,13 +26,27 @@ exports.getPresignedUrl = async (user, docType) => {
 exports.confirmUpload = async (user, docType, s3Key) => {
   if (!s3Key) throw new Error("S3 key manquante");
 
-  const document = await Document.create({
+  const existing = await Document.findOne({
+    where: {
+      userId: user.id,
+      docType,
+    },
+  });
+
+  if (existing) {
+    existing.fileUrl = s3Key;
+    existing.kycStatus = "CREATED";
+    existing.sentAt = null;
+    existing.reviewStartedAt = null;
+    existing.decisionAt = null;
+    await existing.save();
+    return existing;
+  }
+
+  return await Document.create({
     userId: user.id,
     docType,
     fileUrl: s3Key,
     kycStatus: "CREATED",
-    sentAt: new Date(),
   });
-
-  return document;
 };
