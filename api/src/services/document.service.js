@@ -1,11 +1,15 @@
 const Document = require("../models/document.model");
 
-const REQUIRED_DOCS = [
+const ALL_DOCS = [
   "photo_identite",
   "titre_sejour",
   "certificat_scolarite",
-  "rib"
+  "diplome",
+  "rib",
+  "justificatif_domicile",
+  "charte_engagement",
 ];
+
 
 exports.getUserDocuments = async (userId) => {
   return await Document.findAll({
@@ -19,39 +23,28 @@ exports.getUserDocuments = async (userId) => {
 exports.getGlobalKycStatus = async (userId) => {
   const docs = await Document.findAll({ where: { userId } });
 
-  const REQUIRED_DOCS = [
-    "photo_identite",
-    "titre_sejour",
-    "certificat_scolarite",
-    "rib",
-  ];
-
   const deposited = docs.some(d => d.sentAt);
 
-  const validated = REQUIRED_DOCS.every(type =>
-    docs.some(
-      d => d.docType === type && d.kycStatus === "VALIDATED"
-    )
-  );
+  const validatedDocs = docs
+    .filter(d => d.kycStatus === "VALIDATED")
+    .map(d => d.docType);
 
   const refusedDocs = docs
     .filter(d => d.kycStatus === "REFUSED")
     .map(d => d.docType);
-  const validatedDocs = docs
-  .filter(d => d.kycStatus === "VALIDATED")
-  .map(d => d.docType);
 
-
-  const allRefused = REQUIRED_DOCS.every(type =>
-    docs.some(
-      d => d.docType === type && d.kycStatus === "REFUSED"
-    )
+  const validated = ALL_DOCS.every(type =>
+    validatedDocs.includes(type)
   );
 
-  const inReview =
-    deposited &&
-    !validated &&
-    !allRefused;
+  const allRefused = ALL_DOCS.every(type =>
+    refusedDocs.includes(type)
+  );
+
+  const reviewStartedAt =
+    docs.find(d => d.reviewStartedAt)?.reviewStartedAt || null;
+
+  const inReview = !!reviewStartedAt;
 
   const depositedAt = deposited
     ? docs
@@ -59,10 +52,6 @@ exports.getGlobalKycStatus = async (userId) => {
         .sort((a, b) => new Date(a.sentAt) - new Date(b.sentAt))[0]
         ?.sentAt
     : null;
-
-  const reviewStartedAt = docs.find(
-    d => d.reviewStartedAt
-  )?.reviewStartedAt || null;
 
   const decisionAt =
     validated || allRefused
@@ -78,7 +67,7 @@ exports.getGlobalKycStatus = async (userId) => {
     validated,
     refused: allRefused,
     refusedDocs,
-    validatedDocs, 
+    validatedDocs,
     depositedAt,
     reviewStartedAt,
     decisionAt,
