@@ -67,3 +67,17 @@ exports.delete = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+exports.getById = async (req, res) => {
+  try {
+    const mission = await missionService.getMissionById(req.params.id);
+
+    if (!mission) {
+      return res.status(404).json({ error: "Mission introuvable" });
+    }
+
+    res.json(mission.get({ plain: true }));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+};
