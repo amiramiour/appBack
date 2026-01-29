@@ -82,3 +82,15 @@ exports.cancel = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+exports.companyCandidatures = async (req, res) => {
+  try {
+    if (req.user.role !== "company") {
+      return res.status(403).json({ error: "Accès interdit" });
+    }
+
+    const data = await service.getCompanyCandidatures(req.user.id);
+    res.json(data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
