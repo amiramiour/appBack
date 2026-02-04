@@ -29,15 +29,6 @@ StudentProfile.init(
   allowNull: true,
 },
 
-
-    competences: {
-      type: DataTypes.TEXT,
-    },
-
-    disponibilites: {
-      type: DataTypes.TEXT,
-    },
-
     nationalites: {
       type: DataTypes.STRING,
     },
