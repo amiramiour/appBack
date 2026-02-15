@@ -25,12 +25,18 @@ StudentProfile.init(
       type: DataTypes.STRING,
     },
     missions_recherchees: {
-  type: DataTypes.TEXT,
-  allowNull: true,
-},
-
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     nationalites: {
       type: DataTypes.STRING,
+    },
+    competences: {
+      type: DataTypes.TEXT,
+    },
+
+    disponibilites: {
+      type: DataTypes.TEXT,
     },
   },
   {

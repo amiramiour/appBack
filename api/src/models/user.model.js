@@ -17,8 +17,8 @@ User.init(
     // Étudiant
     firstName: DataTypes.STRING,
     lastName: DataTypes.STRING,
+    age: DataTypes.INTEGER,
     phone: DataTypes.STRING,
-    field: DataTypes.STRING,
     training: DataTypes.STRING,
     school: DataTypes.STRING,
     // Entreprise

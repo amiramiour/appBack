@@ -6,9 +6,13 @@ exports.getOrCreateProfile = async (userId) => {
     defaults: { userId },
   });
 
-  if (profile.missions_recherchees) {
-  profile.missions_recherchees = JSON.parse(profile.missions_recherchees);
-}
+    if (profile.missions_recherchees) {
+      profile.missions_recherchees = JSON.parse(profile.missions_recherchees);
+    }
+
+    if (profile.disponibilites) {
+      profile.disponibilites = JSON.parse(profile.disponibilites);
+    }
 
 return profile;
 
@@ -25,8 +29,10 @@ exports.updateProfile = async (userId, data) => {
     localisation: data.localisation,
     langues_parlees: data.langues_parlees,
     competences: data.competences,
-    disponibilites: data.disponibilites,
-    nationalites: data.nationalites,
+  disponibilites: data.disponibilites
+  ? JSON.stringify(data.disponibilites)
+  : null,
+      nationalites: data.nationalites,
     missions_recherchees: data.missions_recherchees
     ? JSON.stringify(data.missions_recherchees)
     : null,

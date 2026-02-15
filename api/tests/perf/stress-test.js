@@ -29,7 +29,6 @@ export function setup() {
       firstName: "Test",
       lastName: "K6",
       phone: "0600000000",
-      field: "informatique",
       training: "MDS",
       school: "MDS Paris",
     }),

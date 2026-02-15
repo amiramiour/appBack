@@ -10,7 +10,7 @@ exports.updateMe = async (req, res) => {
     // Champs autorisés selon le rôle
     const allowedFields =
       user.role === "student"
-        ? ["firstName", "lastName", "phone", "field", "training", "school"]
+        ? ["firstName", "lastName", "phone", "training", "school"]
         : ["companyName", "companyType", "companyId", "phone", "address"];
 
     allowedFields.forEach((field) => {
