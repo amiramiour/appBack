@@ -32,7 +32,6 @@ decisionAt: DataTypes.DATE,
     statusComment: { type: DataTypes.TEXT },
     isGeneral: { type: DataTypes.BOOLEAN, defaultValue: true },
     missionId: { type: DataTypes.INTEGER, allowNull: true },
-    sentAt: { type: DataTypes.DATE },
   },
   {
     sequelize,

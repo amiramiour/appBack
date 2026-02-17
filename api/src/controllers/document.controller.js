@@ -56,11 +56,14 @@ exports.submitDossier = async (req, res) => {
     const userId = req.user.id;
 
     const REQUIRED_DOCS = [
-      "photo_identite",
-      "titre_sejour",
-      "certificat_scolarite",
-      "rib",
-    ];
+  "photo_identite",
+  "titre_sejour",
+  "certificat_scolarite",
+  "diplome",
+  "rib",
+  "justificatif_domicile",
+  "charte_engagement",
+];
 
     const docs = await Document.findAll({
       where: {
@@ -91,7 +94,7 @@ exports.submitDossier = async (req, res) => {
       const hasAlreadyDeposited = docs.some(d => d.sentAt);
 
     //  On remet UNIQUEMENT les refusés en validation
-    await Document.update(
+await Document.update(
   {
     kycStatus: "VALIDATION_ASKED",
     decisionAt: null,
@@ -101,7 +104,7 @@ exports.submitDossier = async (req, res) => {
     where: {
       userId,
       docType: { [Op.in]: REQUIRED_DOCS },
-      kycStatus: "REFUSED",
+      kycStatus: { [Op.in]: ["CREATED", "REFUSED"] }, 
     },
   }
 );

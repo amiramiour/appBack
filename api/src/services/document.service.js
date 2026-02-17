@@ -41,10 +41,11 @@ exports.getGlobalKycStatus = async (userId) => {
     refusedDocs.includes(type)
   );
 
-  const reviewStartedAt =
-    docs.find(d => d.reviewStartedAt)?.reviewStartedAt || null;
 
-  const inReview = !!reviewStartedAt;
+const reviewStartedAt =
+  docs.find(d => d.reviewStartedAt)?.reviewStartedAt || null;
+
+const inReview = !!reviewStartedAt;
 
   const depositedAt = deposited
     ? docs
@@ -78,18 +79,31 @@ exports.getGlobalKycStatus = async (userId) => {
 exports.updateDocumentStatus = async (docId, status, comment) => {
   const doc = await Document.findByPk(docId);
   if (!doc) throw new Error("Document introuvable");
+
   doc.kycStatus = status;
-if (!doc.reviewStartedAt) {
-  doc.reviewStartedAt = new Date(); // admin a commencé
-}
 
-if (status === "VALIDATED" || status === "REFUSED") {
-  doc.decisionAt = new Date(); // décision finale
-}
+  // 1️⃣ Si premier traitement admin → démarrage étude
+  if (!doc.reviewStartedAt) {
+    doc.reviewStartedAt = new Date();
+  }
 
-if (comment) doc.statusComment = comment;
+  if (comment) doc.statusComment = comment;
 
-await doc.save();
+  await doc.save();
+
+  // 2️⃣ Vérifier état global du dossier
+  const docs = await Document.findAll({ where: { userId: doc.userId } });
+
+  const allValidated = docs.every(d => d.kycStatus === "VALIDATED");
+  const allRefused = docs.every(d => d.kycStatus === "REFUSED");
+
+  if (allValidated || allRefused) {
+    // 3️⃣ Mettre decisionAt si pas déjà mis
+    await Document.update(
+      { decisionAt: new Date() },
+      { where: { userId: doc.userId, decisionAt: null } }
+    );
+  }
 
   return doc;
 };
