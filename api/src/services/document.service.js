@@ -82,7 +82,7 @@ exports.updateDocumentStatus = async (docId, status, comment) => {
 
   doc.kycStatus = status;
 
-  // 1️⃣ Si premier traitement admin → démarrage étude
+  //  Si premier traitement admin → démarrage étude
   if (!doc.reviewStartedAt) {
     doc.reviewStartedAt = new Date();
   }
@@ -91,14 +91,14 @@ exports.updateDocumentStatus = async (docId, status, comment) => {
 
   await doc.save();
 
-  // 2️⃣ Vérifier état global du dossier
+  //  Vérifier état global du dossier
   const docs = await Document.findAll({ where: { userId: doc.userId } });
 
   const allValidated = docs.every(d => d.kycStatus === "VALIDATED");
   const allRefused = docs.every(d => d.kycStatus === "REFUSED");
 
   if (allValidated || allRefused) {
-    // 3️⃣ Mettre decisionAt si pas déjà mis
+    //  Mettre decisionAt si pas déjà mis
     await Document.update(
       { decisionAt: new Date() },
       { where: { userId: doc.userId, decisionAt: null } }
