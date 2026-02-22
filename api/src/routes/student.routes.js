@@ -4,6 +4,5 @@ const studentController = require("../controllers/student.controller");
 
 // Public (pour landing page)
 router.get("/", studentController.getStudents);
-router.get("/:id", studentController.getStudentById);
-
+router.get("/:id", studentController.getStudentPublicById);
 module.exports = router;
