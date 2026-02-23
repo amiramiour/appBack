@@ -45,5 +45,13 @@ exports.deleteMission = async (missionId, employerId) => {
   return { message: "Mission supprimée avec succès" };
 };
 exports.getMissionById = async (id) => {
-  return await Mission.findByPk(id);
+  return await Mission.findByPk(id, {
+    include: [
+      {
+        model: User,
+        as: "employer",
+        attributes: ["id", "companyName", "photoUrl"],
+      },
+    ],
+  });
 };
