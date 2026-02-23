@@ -1,7 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
-const path = require("path");
 const sequelize = require("./config/database");
 const logger = require("./config/logger"); //  logger Pino
 const { register, httpRequestCounter, httpRequestDuration } = require("./config/metrics"); //  métriques
@@ -12,10 +10,10 @@ const documentRoutes = require("./routes/document.routes");
 const studentRoutes = require("./routes/student.routes");
 const candidatureRoutes = require("./routes/candidature.routes");
 const studentProfileRoutes = require("./routes/studentProfile.routes");
+const contactRoutes = require("./routes/contact.routes");
+const feedbackRoutes = require("./routes/feedback.routes");
 require("./models"); 
 
-//  Charger le fichier .env avant tout
-dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 const app = express();
 
@@ -74,7 +72,8 @@ app.use("/me", meRoutes);
 app.use("/missions", missionRoutes);
 app.use("/documents", documentRoutes);
 app.use("/uploads", express.static("uploads"));
-
+app.use("/contact", contactRoutes);
+app.use("/feedback", feedbackRoutes);
 //  Route test simple
 app.get("/", (req, res) => {
   logger.info(" API LinkyJob running");
