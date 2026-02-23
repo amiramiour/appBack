@@ -27,3 +27,10 @@ tags: data.tags && data.tags.length > 0
 
   return feedback;
 };
+exports.getAllFeedbacks = async () => {
+  return await Feedback.findAll({
+    where: { note: { [require("sequelize").Op.gte]: 3 } }, 
+    order: [["createdAt", "DESC"]],
+    limit: 10,
+  });
+};

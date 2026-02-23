@@ -10,5 +10,5 @@ const feedbackLimiter = rateLimit({
 });
 
 router.post("/", feedbackLimiter, feedbackController.createFeedback);
-
+router.get("/", feedbackController.getAllFeedbacks);
 module.exports = router;
