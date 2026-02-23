@@ -3,29 +3,114 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 const crypto = require("crypto");
 const { sendPasswordResetEmail } = require("./email.service");
+const StudentProfile = require("../models/studentProfile.model");
 exports.register = async (data) => {
   try {
     const { email, password, role } = data;
+
     if (!email || !password || !role) {
       throw new Error("Email, mot de passe et rôle sont requis");
     }
 
+    if (!["student", "company"].includes(role)) {
+      throw new Error("Rôle invalide");
+    }
+
     const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) throw new Error("Cet email est déjà utilisé");
+    if (existingUser) {
+      throw new Error("Cet email est déjà utilisé");
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ ...data, password: hashedPassword });
 
-    const token = jwt.sign(
-      { sub: newUser.id, role: newUser.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
+    let userPayload = {
+      email,
+      password: hashedPassword,
+      role,
+    };
 
-    //  Retour complet du profil (sauf le mot de passe)
-    const { password: _, ...userData } = newUser.toJSON();
+    if (role === "student") {
+  const {
+    firstName,
+    lastName,
+    age,
+    phone,
+    training,
+    school,
 
-    return { user: userData, token };
+    // champs profil étudiant
+    nationalites,
+    competences,
+    langues_parlees,
+    missions_recherchees,
+    disponibilites,
+  } = data;
+
+  if (!firstName || !lastName || !training) {
+    throw new Error("Champs étudiant obligatoires manquants");
+  }
+
+  const newUser = await User.create({
+    ...userPayload,
+    firstName,
+    lastName,
+    age,
+    phone,
+    training,
+    school,
+  });
+
+  await StudentProfile.create({
+    userId: newUser.id,
+    localisation: data.localisation,
+    nationalites,
+    competences,
+    langues_parlees,
+    disponibilites: disponibilites
+  ? JSON.stringify(disponibilites)
+  : null,
+    missions_recherchees: missions_recherchees
+      ? JSON.stringify(missions_recherchees)
+      : null,
+  });
+
+  const token = jwt.sign(
+    { sub: newUser.id, role: newUser.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "1d" }
+  );
+
+  const { password: _, ...userData } = newUser.toJSON();
+
+  return { user: userData, token };
+}
+
+    if (role === "company") {
+      const { companyName, companyType, companyId, address } = data;
+
+      if (!companyName || !companyType) {
+        throw new Error("Champs entreprise obligatoires manquants");
+      }
+
+      userPayload = {
+        ...userPayload,
+        companyName,
+        companyType,
+        companyId,
+        address,
+      };
+      const newUser = await User.create(userPayload);
+
+const token = jwt.sign(
+  { sub: newUser.id, role: newUser.role },
+  process.env.JWT_SECRET,
+  { expiresIn: "1d" }
+);
+
+const { password: _, ...userData } = newUser.toJSON();
+
+return { user: userData, token };
+    }
   } catch (error) {
     throw new Error(error.message);
   }

@@ -9,11 +9,16 @@ User.init(
     role: { type: DataTypes.ENUM("student", "company"), allowNull: false },
     email: { type: DataTypes.STRING, allowNull: false, unique: true },
     password: { type: DataTypes.STRING, allowNull: false },
+    photoUrl: {
+  type: DataTypes.STRING,
+  defaultValue: "uploads/default-avatar.png"
+},
+
     // Étudiant
     firstName: DataTypes.STRING,
     lastName: DataTypes.STRING,
+    age: DataTypes.INTEGER,
     phone: DataTypes.STRING,
-    field: DataTypes.STRING,
     training: DataTypes.STRING,
     school: DataTypes.STRING,
     // Entreprise
@@ -21,7 +26,7 @@ User.init(
     companyType: DataTypes.ENUM("SARL", "SAS", "AUTO_ENTREPRENEUR"),
     companyId: DataTypes.STRING,
     address: DataTypes.STRING,
-    legalEmail: DataTypes.STRING,
+
     resetToken: DataTypes.STRING,
     resetTokenExpiry: DataTypes.DATE,
   },

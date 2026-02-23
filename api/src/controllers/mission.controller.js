@@ -22,19 +22,24 @@ exports.create = async (req, res) => {
 
 exports.list = async (req, res) => {
   try {
-    // 🔹 Vérifie le cache
+    //  Cache
     const cached = missionCache.get("missions");
     if (cached) {
       return res.json({ source: "cache", data: cached });
     }
 
-    // 🔹 Si pas dans le cache → récupère depuis la DB
+    //  DB
     const missions = await missionService.getAllMissions();
 
-    // 🔹 Stocke dans le cache pour 30s
-    missionCache.set("missions", missions);
+    //  CONVERSION CRITIQUE (OBLIGATOIRE)
+    const plainMissions = missions.map(m =>
+      m.get({ plain: true })
+    );
 
-    res.json({ source: "db", data: missions });
+    //  Cache sécurisé
+    missionCache.set("missions", plainMissions);
+
+    res.json({ source: "db", data: plainMissions });
   } catch (err) {
     console.error("Erreur dans list missions:", err);
     res.status(500).json({ error: "Erreur interne du serveur" });
@@ -60,5 +65,19 @@ exports.delete = async (req, res) => {
     res.json(result);
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+};
+exports.getById = async (req, res) => {
+  try {
+    const mission = await missionService.getMissionById(req.params.id);
+
+    if (!mission) {
+      return res.status(404).json({ error: "Mission introuvable" });
+    }
+
+    res.json(mission.get({ plain: true }));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erreur serveur" });
   }
 };

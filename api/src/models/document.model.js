@@ -5,6 +5,10 @@ class Document extends Model {}
 
 Document.init(
   {
+    sentAt: DataTypes.DATE,
+reviewStartedAt: DataTypes.DATE,
+decisionAt: DataTypes.DATE,
+
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     userId: { type: DataTypes.INTEGER, allowNull: false },
     docType: {
@@ -28,7 +32,6 @@ Document.init(
     statusComment: { type: DataTypes.TEXT },
     isGeneral: { type: DataTypes.BOOLEAN, defaultValue: true },
     missionId: { type: DataTypes.INTEGER, allowNull: true },
-    sentAt: { type: DataTypes.DATE },
   },
   {
     sequelize,

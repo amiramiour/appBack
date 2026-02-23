@@ -6,15 +6,37 @@ class Mission extends Model {}
 Mission.init(
   {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+
     employerId: { type: DataTypes.INTEGER, allowNull: false },
+
+    // FRONT : intitule
     title: { type: DataTypes.STRING, allowNull: false },
+
+    // FRONT : description
     description: { type: DataTypes.TEXT, allowNull: false },
-    category: { type: DataTypes.ENUM("qualifiee", "generale"), allowNull: false },
-    type: { type: DataTypes.ENUM("ponctuelle", "longue_duree", "teletravail"), allowNull: false },
-    location: DataTypes.STRING,
-    startDate: DataTypes.DATE,
-    durationHours: DataTypes.INTEGER,
-    remuneration: DataTypes.DECIMAL,
+
+    // FRONT : type (libre)
+    type: { type: DataTypes.STRING, allowNull: false },
+
+    // FRONT : niveau
+    niveau: { type: DataTypes.STRING },
+
+    // FRONT : lieu
+    location: { type: DataTypes.STRING },
+
+    // FRONT : dateDebut
+    startDate: { type: DataTypes.DATE },
+
+    // FRONT : duree
+    durationHours: { type: DataTypes.STRING },
+
+    // FRONT : rémunération
+    remuneration: { type: DataTypes.DECIMAL },
+
+    // FRONT : conditions (checkbox)
+    conditions: { type: DataTypes.BOOLEAN, defaultValue: false },
+    
+    // laissé comme avant
     status: {
       type: DataTypes.ENUM("active", "expiree", "archivee"),
       defaultValue: "active",
@@ -27,5 +49,6 @@ Mission.init(
     timestamps: true,
   }
 );
+
 
 module.exports = Mission;
