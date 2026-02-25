@@ -1,19 +1,26 @@
 const Candidature = require("../models/candidature.model");
 const Mission = require("../models/mission.model");
+const { Op } = require("sequelize");
 
 exports.applyToMission = async (studentId, missionId) => {
-  const exists = await Candidature.findOne({
+  // Vérifier si une candidature existe déjà
+  let candidature = await Candidature.findOne({
     where: { studentId, missionId },
   });
 
-  if (exists) {
-    throw new Error("Vous avez déjà postulé à cette mission");
+  if (candidature) {
+
+    if (["rejected", "cancelled"].includes(candidature.status)) {
+      candidature.status = "under_review";
+      return await candidature.save();
+    }
+    throw new Error("Vous avez déjà une candidature active pour cette mission");
   }
 
   return await Candidature.create({
     studentId,
     missionId,
-    status: "submitted",
+    status: "under_review",
   });
 };
 
@@ -21,10 +28,10 @@ exports.getStudentHistory = async (studentId) => {
   return await Candidature.findAll({
     where: { studentId },
     include: [
-      {
+      { 
         model: Mission,
-        as: "mission", //  ALIAS EXACT
-      },
+        as: "mission" 
+      }
     ],
     order: [["createdAt", "DESC"]],
   });
@@ -38,7 +45,6 @@ exports.getMissionCandidatures = async (missionId, employerId) => {
     throw new Error("Mission introuvable");
   }
 
-  // SÉCURITÉ CRITIQUE
   if (mission.employerId !== employerId) {
     throw new Error("Accès interdit à cette mission");
   }
@@ -102,13 +108,15 @@ exports.cancelCandidature = async (id, studentId) => {
     throw new Error("Action interdite");
   }
 
-  //  Interdictions métier
-  if (["accepted", "rejected", "cancelled"].includes(candidature.status)) {
-    throw new Error(
-      "Impossible d’annuler une candidature déjà traitée"
-    );
+  // On peut annuler seulement si c'est en cours de traitement
+  if (candidature.status !== "under_review") {
+    throw new Error("Impossible d’annuler une candidature traitée");
   }
 
+  // Option 1 : Suppression définitive (plus propre pour l'historique si on annule)
+  // await candidature.destroy(); 
+  
+  // Option 2 : Marquer comme annulée (pour garder une trace)
   candidature.status = "cancelled";
   await candidature.save();
 
