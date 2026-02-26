@@ -19,13 +19,12 @@ Candidature.init(
 
     status: {
       type: DataTypes.ENUM(
-        "submitted",
-        "under_review",
-        "accepted",
-        "rejected",
-        "cancelled"
+        "under_review", 
+        "accepted",    
+        "rejected",     
+        "cancelled"    
       ),
-      defaultValue: "submitted",
+      defaultValue: "under_review", 
     },
   },
   {
