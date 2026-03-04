@@ -16,12 +16,14 @@ const app = express();
 // Helmet (security headers)
 app.use(helmet());
 
-// Global rate limit
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 300, 
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
 });
-app.use(limiter);
+
+app.use("/auth", authLimiter);
+app.use("/contact", authLimiter);
+app.use("/feedback", authLimiter);
 
 // CORS
 app.use(
