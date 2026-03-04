@@ -4,6 +4,7 @@ const Candidature = require("./candidature.model");
 const StudentProfile = require("./studentProfile.model");
 const ContactMessage = require("./contactMessage.model");
 const Feedback = require("./feedback.model");
+const Document = require("./document.model");
 /* =====================================================
    ASSOCIATIONS
    ===================================================== */
@@ -59,6 +60,8 @@ module.exports = {
   Mission,
   User,
   Candidature,
+  StudentProfile,
+  Document,
   ContactMessage,
   Feedback,
 };
