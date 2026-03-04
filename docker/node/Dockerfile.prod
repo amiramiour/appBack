@@ -1,0 +1,22 @@
+# ---------- STAGE 1 : Build ----------
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY api/package*.json ./
+RUN npm install --omit=dev
+
+COPY api .
+
+# ---------- STAGE 2 : Runtime ----------
+FROM node:20-alpine
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY --from=builder /app /app
+
+EXPOSE 8080
+
+CMD sh -c "npx sequelize-cli db:migrate && node src/server.js"

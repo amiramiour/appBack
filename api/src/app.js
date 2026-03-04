@@ -1,29 +1,45 @@
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 const sequelize = require("./config/database");
-const logger = require("./config/logger"); //  logger Pino
-const { register, httpRequestCounter, httpRequestDuration } = require("./config/metrics"); //  métriques
-const authRoutes = require("./routes/auth.routes");
-const meRoutes = require("./routes/me.routes");
-const missionRoutes = require("./routes/mission.routes");
-const documentRoutes = require("./routes/document.routes");
-const studentRoutes = require("./routes/student.routes");
-const candidatureRoutes = require("./routes/candidature.routes");
-const studentProfileRoutes = require("./routes/studentProfile.routes");
-const contactRoutes = require("./routes/contact.routes");
-const feedbackRoutes = require("./routes/feedback.routes");
-require("./models"); 
-
+const logger = require("./config/logger");
+const { register, httpRequestCounter, httpRequestDuration } = require("./config/metrics");
+require("./models");
 
 const app = express();
 
-// Middlewares globaux
-app.use(cors());
-app.use(express.json());
-app.use("/students", studentRoutes);
-app.use("/student-profile", studentProfileRoutes);
+/* ==============================
+   SECURITY MIDDLEWARES
+============================== */
 
-//  Middleware de logs Pino (requêtes HTTP)
+// Helmet (security headers)
+app.use(helmet());
+
+// Global rate limit
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, 
+  max: 300, 
+});
+app.use(limiter);
+
+// CORS
+app.use(
+  cors({
+    origin:
+      process.env.NODE_ENV === "production"
+        ? process.env.FRONTEND_URL
+        : "*",
+    credentials: true,
+  })
+);
+
+app.use(express.json());
+
+/* ==============================
+   LOGGING
+============================== */
+
 app.use((req, res, next) => {
   const start = Date.now();
   res.on("finish", () => {
@@ -38,7 +54,10 @@ app.use((req, res, next) => {
   next();
 });
 
-//  Middleware de métriques Prometheus
+/* ==============================
+   METRICS
+============================== */
+
 app.use((req, res, next) => {
   const start = Date.now();
   res.on("finish", () => {
@@ -56,39 +75,59 @@ app.use((req, res, next) => {
   next();
 });
 
-//  Route Prometheus
-app.get("/metrics", async (req, res) => {
-  try {
-    res.set("Content-Type", register.contentType);
-    res.end(await register.metrics());
-  } catch (err) {
-    res.status(500).send(err.message);
-  }
+if (process.env.NODE_ENV !== "production") {
+  app.get("/metrics", async (req, res) => {
+    try {
+      res.set("Content-Type", register.contentType);
+      res.end(await register.metrics());
+    } catch (err) {
+      res.status(500).send(err.message);
+    }
+  });
+}
+
+/* ==============================
+   ROUTES
+============================== */
+
+app.use("/auth", require("./routes/auth.routes"));
+app.use("/me", require("./routes/me.routes"));
+app.use("/missions", require("./routes/mission.routes"));
+app.use("/documents", require("./routes/document.routes"));
+app.use("/students", require("./routes/student.routes"));
+app.use("/student-profile", require("./routes/studentProfile.routes"));
+app.use("/contact", require("./routes/contact.routes"));
+app.use("/feedback", require("./routes/feedback.routes"));
+app.use("/api/candidatures", require("./routes/candidature.routes"));
+
+app.use("/uploads", express.static("uploads"));
+app.get("/", (req, res) => {
+  res.json({ message: "LinkyJob API running" });
 });
 
-// Routes principales
-app.use("/auth", authRoutes);
-app.use("/me", meRoutes);
-app.use("/missions", missionRoutes);
-app.use("/documents", documentRoutes);
-app.use("/uploads", express.static("uploads"));
-app.use("/contact", contactRoutes);
-app.use("/feedback", feedbackRoutes);
-//  Route test simple
-app.get("/", (req, res) => {
-  logger.info(" API LinkyJob running");
-  res.json({ message: "LinkyJob API running " });
+/* ==============================
+   ERROR HANDLER
+============================== */
+
+app.use((err, req, res, next) => {
+  logger.error(err);
+
+  res.status(500).json({
+    message:
+      process.env.NODE_ENV === "production"
+        ? "Internal server error"
+        : err.message,
+  });
 });
-//test 5xx
-app.get("/error", (req, res) => {
-  throw new Error("Test internal server error");
-});
-app.use("/api/candidatures", candidatureRoutes);
-// Connexion Sequelize
+
+/* ==============================
+   DB CONNECTION
+============================== */
+
 sequelize
-  .sync({ alter: true })
+  .authenticate()
   .then(() => {
-    logger.info("Database connected & synced");
+    logger.info("Database connected");
   })
   .catch((err) => {
     logger.error("Database connection failed:", err);
