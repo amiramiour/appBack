@@ -8,7 +8,7 @@ const { register, httpRequestCounter, httpRequestDuration } = require("./config/
 require("./models");
 
 const app = express();
-
+app.set("trust proxy", 1);
 /* ==============================
    SECURITY MIDDLEWARES
 ============================== */
