@@ -106,7 +106,9 @@ app.use("/uploads", express.static("uploads"));
 app.get("/", (req, res) => {
   res.json({ message: "LinkyJob API running" });
 });
-
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
 /* ==============================
    ERROR HANDLER
 ============================== */
