@@ -2,11 +2,13 @@ const express = require("express");
 const router = express.Router();
 const authController = require("../controllers/auth.controller");
 const { requireAuth } = require("../middleware/auth"); // 🟢 OBLIGATOIRE
+const path = require("path");
 const multer = require("multer");
 
-//  Configuration du stockage Multer
 const storage = multer.diskStorage({
-  destination: "uploads/",
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, "../../uploads"));
+  },
   filename: (req, file, cb) => {
     cb(null, `user-${req.user.id}-${Date.now()}.jpg`);
   },
@@ -14,9 +16,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ⬇⬇⬇ ROUTES AUTH ⬇⬇⬇
 
-// Upload de photo de profil
 router.post(
   "/upload-photo",
   requireAuth,                //  Vérifie le token
