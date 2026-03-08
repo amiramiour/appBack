@@ -13,11 +13,8 @@ app.set("trust proxy", 1);
    SECURITY MIDDLEWARES
 ============================== */
 
-app.use(
-  helmet({
-    crossOriginResourcePolicy: false
-  })
-);
+// Helmet (security headers)
+app.use(helmet());
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -105,7 +102,8 @@ app.use("/contact", require("./routes/contact.routes"));
 app.use("/feedback", require("./routes/feedback.routes"));
 app.use("/api/candidatures", require("./routes/candidature.routes"));
 
-app.use("/uploads", express.static("uploads"));
+const path = require("path");
+app.use("/uploads", express.static(path.resolve(__dirname, "uploads")));
 app.get("/", (req, res) => {
   res.json({ message: "LinkyJob API running" });
 });
