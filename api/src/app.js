@@ -15,10 +15,7 @@ app.set("trust proxy", 1);
 
 app.use(
   helmet({
-    crossOriginResourcePolicy:
-      process.env.NODE_ENV === "production"
-        ? { policy: "same-origin" }
-        : false,
+    crossOriginResourcePolicy: false
   })
 );
 
