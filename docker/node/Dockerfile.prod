@@ -7,7 +7,6 @@ COPY api/package*.json ./
 RUN npm install --omit=dev
 
 COPY api .
-COPY uploads ./uploads
 # ---------- STAGE 2 : Runtime ----------
 FROM node:20-alpine
 
