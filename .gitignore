@@ -20,5 +20,6 @@ Thumbs.db
 .idea/
 .vscode/
 node_modules
-
+api/uploads/*
+!api/uploads/default-avatar.png
 
