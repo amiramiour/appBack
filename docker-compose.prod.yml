@@ -1,8 +1,5 @@
 services:
 
-  # ==============================
-  # TRAEFIK (Reverse Proxy + SSL)
-  # ==============================
   traefik:
     image: traefik:v2.11
     container_name: traefik
@@ -25,9 +22,6 @@ services:
     networks:
       - proxy
 
-  # ==============================
-  # NODE API
-  # ==============================
   node-app:
     build:
       context: .
@@ -35,7 +29,7 @@ services:
     container_name: node-app
     restart: unless-stopped
     env_file:
-      - .env.prod
+      - .env
     environment:
       - NODE_ENV=production
       - PORT=8080
@@ -50,24 +44,22 @@ services:
       - "traefik.http.routers.node-app.entrypoints=websecure"
       - "traefik.http.routers.node-app.tls.certresolver=letsencrypt"
       - "traefik.http.services.node-app.loadbalancer.server.port=8080"
+      - "traefik.docker.network=appback_proxy"
 
-  # ==============================
-  # MYSQL
-  # ==============================
   mysql-db:
     image: mysql:8.0
     container_name: mysql-db
     restart: unless-stopped
-    env_file:
-      - .env.prod
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
       - backend
 
-# ==============================
-# NETWORKS
-# ==============================
 networks:
   proxy:
     driver: bridge
@@ -75,8 +67,5 @@ networks:
     driver: bridge
     internal: true
 
-# ==============================
-# VOLUMES
-# ==============================
 volumes:
   mysql_data:
