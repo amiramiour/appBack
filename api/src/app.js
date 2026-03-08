@@ -106,7 +106,7 @@ app.use("/feedback", require("./routes/feedback.routes"));
 app.use("/api/candidatures", require("./routes/candidature.routes"));
 
 const path = require("path");
-app.use("/uploads", express.static(path.resolve(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.get("/", (req, res) => {
   res.json({ message: "LinkyJob API running" });
 });
