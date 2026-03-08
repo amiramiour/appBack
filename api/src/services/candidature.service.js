@@ -1,5 +1,6 @@
 const Candidature = require("../models/candidature.model");
 const Mission = require("../models/mission.model");
+const User = require("../models/user.model");
 const { Op } = require("sequelize");
 
 exports.applyToMission = async (studentId, missionId) => {
