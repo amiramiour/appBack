@@ -46,9 +46,8 @@ services:
       - "traefik.http.routers.node-app.rule=Host(`api.${DOMAIN}`)"
       - "traefik.http.routers.node-app.entrypoints=websecure"
       - "traefik.http.routers.node-app.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.node-app.service=node-app"
       - "traefik.http.services.node-app.loadbalancer.server.port=8080"
-      - "traefik.docker.network=appback_proxy"
+      - "traefik.docker.network=proxy"
 
   mysql-db:
     image: mysql:8.0
@@ -66,8 +65,11 @@ services:
 
 networks:
   proxy:
+    name: proxy
     driver: bridge
+
   backend:
+    name: backend
     driver: bridge
     internal: true
 
