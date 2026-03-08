@@ -13,8 +13,14 @@ app.set("trust proxy", 1);
    SECURITY MIDDLEWARES
 ============================== */
 
-// Helmet (security headers)
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy:
+      process.env.NODE_ENV === "production"
+        ? { policy: "same-origin" }
+        : false,
+  })
+);
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
