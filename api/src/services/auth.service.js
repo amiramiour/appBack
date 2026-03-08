@@ -6,10 +6,20 @@ const { sendPasswordResetEmail } = require("./email.service");
 const StudentProfile = require("../models/studentProfile.model");
 exports.register = async (data) => {
   try {
-    const { email, password, role } = data;
+  let { email, password, role } = data;
 
+  email = email.toLowerCase().trim();
+
+    const strongPasswordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
     if (!email || !password || !role) {
       throw new Error("Email, mot de passe et rôle sont requis");
+    }
+    
+    if (!strongPasswordRegex.test(password)) {
+      throw new Error(
+        "Le mot de passe doit contenir au minimum 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial."
+      );
     }
 
     if (!["student", "company"].includes(role)) {
@@ -119,8 +129,7 @@ return { user: userData, token };
 exports.login = async (email, password) => {
   try {
     const user = await User.findOne({ where: { email } });
-    if (!user) throw new Error("Utilisateur introuvable");
-
+    if (!user) throw new Error("Email ou mot de passe incorrect");
     const match = await bcrypt.compare(password, user.password);
     if (!match) throw new Error("Identifiants invalides");
 
@@ -168,6 +177,14 @@ exports.resetPassword = async (token, newPassword) => {
 
   if (!user) throw new Error("Lien de réinitialisation invalide ou expiré");
 
+  const strongPasswordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
+  if (!strongPasswordRegex.test(newPassword)) {
+    throw new Error(
+      "Le mot de passe doit contenir au minimum 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial."
+    );
+  }
   const hashed = await bcrypt.hash(newPassword, 10);
   user.password = hashed;
   user.resetToken = null;
