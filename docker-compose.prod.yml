@@ -41,6 +41,8 @@ services:
     networks:
       - proxy
       - backend
+    volumes:
+      - ./uploads:/app/uploads
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.node-app.rule=Host(`api.${DOMAIN}`)"
