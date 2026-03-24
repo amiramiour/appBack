@@ -186,3 +186,115 @@ exports.sendFeedbackNotification = async (data) => {
 `,
   });
 };
+exports.sendCandidatureAccepted = async (email, firstName, missionTitle) => {
+  return await resend.emails.send({
+    from: "LinkyJob <onboarding@resend.dev>",
+    to: email,
+    subject: "Bonne nouvelle 🎉 Votre candidature est acceptée",
+    html: `
+<div style="background-color:#f4f6f9;padding:40px 0;font-family:Arial,Helvetica,sans-serif;">
+  <table align="center" width="600" cellpadding="0" cellspacing="0"
+         style="background:#ffffff;border-radius:12px;overflow:hidden;
+         box-shadow:0 4px 20px rgba(0,0,0,0.05);">
+
+    <tr>
+      <td style="background:#16a34a;padding:20px 30px;color:#ffffff;">
+        <h2 style="margin:0;">🎉 Candidature acceptée</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="padding:30px;color:#334155;line-height:1.6;">
+        <p>Bonjour <strong>${firstName || "Utilisateur"}</strong>,</p>
+
+        <p>
+          Excellente nouvelle ! Votre candidature pour la mission :
+        </p>
+
+        <div style="margin:20px 0;padding:15px;background:#f1f5f9;border-radius:8px;">
+          <strong>${missionTitle}</strong>
+        </div>
+
+        <p>
+          a été <strong style="color:#16a34a;">acceptée</strong> par l’entreprise 🎉
+        </p>
+
+        <p>
+          L’entreprise va vous contacter prochainement.
+        </p>
+
+        <p style="margin-top:30px;">
+          Bonne mission 💼<br/>
+          <strong>L’équipe LinkyJob</strong>
+        </p>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="background:#f8fafc;padding:20px;text-align:center;
+                 font-size:12px;color:#94a3b8;">
+        © ${new Date().getFullYear()} LinkyJob
+      </td>
+    </tr>
+
+  </table>
+</div>
+`,
+  });
+};
+exports.sendCandidatureRejected = async (email, firstName, missionTitle) => {
+  return await resend.emails.send({
+    from: "LinkyJob <onboarding@resend.dev>",
+    to: email,
+    subject: "Réponse à votre candidature",
+    html: `
+<div style="background-color:#f4f6f9;padding:40px 0;font-family:Arial,Helvetica,sans-serif;">
+  <table align="center" width="600" cellpadding="0" cellspacing="0"
+         style="background:#ffffff;border-radius:12px;overflow:hidden;
+         box-shadow:0 4px 20px rgba(0,0,0,0.05);">
+
+    <tr>
+      <td style="background:#ef4444;padding:20px 30px;color:#ffffff;">
+        <h2 style="margin:0;">Réponse à votre candidature</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="padding:30px;color:#334155;line-height:1.6;">
+        <p>Bonjour <strong>${firstName || "Utilisateur"}</strong>,</p>
+
+        <p>
+          Votre candidature pour la mission :
+        </p>
+
+        <div style="margin:20px 0;padding:15px;background:#f1f5f9;border-radius:8px;">
+          <strong>${missionTitle}</strong>
+        </div>
+
+        <p>
+          n’a malheureusement pas été retenue cette fois-ci.
+        </p>
+
+        <p>
+          Continuez à postuler 💪 de nouvelles opportunités arrivent !
+        </p>
+
+        <p style="margin-top:30px;">
+          Courage 💙<br/>
+          <strong>L’équipe LinkyJob</strong>
+        </p>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="background:#f8fafc;padding:20px;text-align:center;
+                 font-size:12px;color:#94a3b8;">
+        © ${new Date().getFullYear()} LinkyJob
+      </td>
+    </tr>
+
+  </table>
+</div>
+`,
+  });
+};

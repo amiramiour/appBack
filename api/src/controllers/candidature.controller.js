@@ -46,7 +46,15 @@ exports.missionCandidatures = async (req, res) => {
 
 exports.accept = async (req, res) => {
   try {
-    const result = await service.acceptCandidature(req.params.id);
+    if (req.user.role !== "company") {
+      return res.status(403).json({ error: "Accès entreprise uniquement" });
+    }
+
+    const result = await service.acceptCandidature(
+      req.params.id,
+      req.user.id 
+    );
+
     res.json(result);
   } catch (err) {
     res.status(400).json({ error: err.message });
