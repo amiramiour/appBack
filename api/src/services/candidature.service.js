@@ -2,9 +2,30 @@ const Candidature = require("../models/candidature.model");
 const Mission = require("../models/mission.model");
 const User = require("../models/user.model");
 const { Op } = require("sequelize");
+const emailService = require("./resendEmail.service");
 
 exports.applyToMission = async (studentId, missionId) => {
-  // Vérifier si une candidature existe déjà
+  const existingAccepted = await Candidature.findOne({
+    where: {
+      studentId,
+      status: "accepted",
+    },
+  });
+
+  if (existingAccepted) {
+    throw new Error("Vous avez déjà une mission en cours");
+  }
+
+  const mission = await Mission.findByPk(missionId);
+
+  if (!mission) {
+    throw new Error("Mission introuvable");
+  }
+
+  if (mission.status !== "active") {
+    throw new Error("Cette mission n'est plus disponible");
+  }
+
   let candidature = await Candidature.findOne({
     where: { studentId, missionId },
   });
@@ -58,24 +79,65 @@ exports.getMissionCandidatures = async (missionId, employerId) => {
 };
 
 
-exports.acceptCandidature = async (id) => {
-  const candidature = await Candidature.findByPk(id);
-  if (!candidature) throw new Error("Candidature introuvable");
+exports.acceptCandidature = async (id, employerId) => {
+  const candidature = await Candidature.findByPk(id, {
+    include: [{ model: Mission, as: "mission" }],
+  });
 
-  // Accepter celle-ci
+  if (!candidature) throw new Error("Candidature introuvable");
+    if (candidature.status !== "under_review") {
+  throw new Error("Candidature déjà traitée");
+}
+  const mission = candidature.mission;
+
+  if (mission.employerId !== employerId) {
+    throw new Error("Accès interdit");
+  }
+
+  if (mission.status !== "active") {
+    throw new Error("Mission déjà traitée");
+  }
+
   candidature.status = "accepted";
   await candidature.save();
 
-  // Refuser toutes les autres candidatures de l'étudiant
+  mission.status = "archivee";
+  await mission.save();
+
   await Candidature.update(
     { status: "rejected" },
     {
       where: {
-        studentId: candidature.studentId,
-        id: { [require("sequelize").Op.ne]: id },
+        missionId: candidature.missionId,
+        id: { [Op.ne]: id },
       },
     }
   );
+
+  const acceptedStudent = await User.findByPk(candidature.studentId);
+
+  await emailService.sendCandidatureAccepted(
+    acceptedStudent.email,
+    acceptedStudent.firstName,
+    mission.title
+  );
+
+  const rejectedCandidatures = await Candidature.findAll({
+    where: {
+      missionId: candidature.missionId,
+      id: { [Op.ne]: id },
+    },
+  });
+
+  for (const c of rejectedCandidatures) {
+    const student = await User.findByPk(c.studentId);
+
+    await emailService.sendCandidatureRejected(
+      student.email,
+      student.firstName,
+      mission.title
+    );
+  }
 
   return candidature;
 };
@@ -86,7 +148,9 @@ exports.rejectCandidature = async (id, employerId) => {
   });
 
   if (!candidature) throw new Error("Candidature introuvable");
-
+    if (candidature.status !== "under_review") {
+  throw new Error("Candidature déjà traitée");
+}
   if (candidature.mission.employerId !== employerId) {
     throw new Error("Accès interdit");
   }
