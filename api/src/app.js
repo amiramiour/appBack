@@ -104,7 +104,9 @@ app.use("/student-profile", require("./routes/studentProfile.routes"));
 app.use("/contact", require("./routes/contact.routes"));
 app.use("/feedback", require("./routes/feedback.routes"));
 app.use("/api/candidatures", require("./routes/candidature.routes"));
+const adminRoutes = require("./routes/admin.routes");
 
+app.use("/admin", adminRoutes);
 const path = require("path");
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.get("/", (req, res) => {
