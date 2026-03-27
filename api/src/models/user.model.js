@@ -10,9 +10,9 @@ User.init(
     email: { type: DataTypes.STRING, allowNull: false, unique: true },
     password: { type: DataTypes.STRING, allowNull: false },
     photoUrl: {
-  type: DataTypes.STRING,
-  defaultValue: "uploads/default-avatar.png"
-},
+      type: DataTypes.STRING,
+      defaultValue: "uploads/default-avatar.png"
+    },
 
     // Étudiant
     firstName: DataTypes.STRING,
@@ -29,6 +29,14 @@ User.init(
 
     resetToken: DataTypes.STRING,
     resetTokenExpiry: DataTypes.DATE,
+    isPremium: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+
+    subscriptionType: {
+      type: DataTypes.STRING,
+    },
   },
   {
     sequelize,
