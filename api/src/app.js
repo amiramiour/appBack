@@ -105,7 +105,7 @@ app.use("/contact", require("./routes/contact.routes"));
 app.use("/feedback", require("./routes/feedback.routes"));
 app.use("/api/candidatures", require("./routes/candidature.routes"));
 const adminRoutes = require("./routes/admin.routes");
-
+app.use("/subscribe", require("./routes/subscription.routes"));
 app.use("/admin", adminRoutes);
 const path = require("path");
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
