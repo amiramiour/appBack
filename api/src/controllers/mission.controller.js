@@ -1,7 +1,6 @@
 const missionService = require("../services/mission.service");
 const NodeCache = require("node-cache");
 
-// 🧠 Cache mémoire avec TTL = 30 secondes
 const missionCache = new NodeCache({ stdTTL: 30 });
 
 exports.create = async (req, res) => {
@@ -10,7 +9,6 @@ exports.create = async (req, res) => {
       return res.status(403).json({ error: "Accès réservé aux employeurs" });
     }
 
-    // Lorsqu'on crée une mission → on vide le cache
     missionCache.del("missions");
 
     const mission = await missionService.createMission(req.body, req.user.id);
@@ -28,15 +26,12 @@ exports.list = async (req, res) => {
       return res.json({ source: "cache", data: cached });
     }
 
-    //  DB
     const missions = await missionService.getAllMissions();
 
-    //  CONVERSION CRITIQUE (OBLIGATOIRE)
     const plainMissions = missions.map(m =>
       m.get({ plain: true })
     );
 
-    //  Cache sécurisé
     missionCache.set("missions", plainMissions);
 
     res.json({ source: "db", data: plainMissions });
@@ -59,7 +54,6 @@ exports.delete = async (req, res) => {
   try {
     const result = await missionService.deleteMission(req.params.id, req.user.id);
 
-    // 🧹 Supprime le cache si une mission est supprimée
     missionCache.del("missions");
 
     res.json(result);

@@ -22,4 +22,4 @@ Thumbs.db
 node_modules
 api/uploads/*
 !api/uploads/default-avatar.png
-
+api/coverage/*
