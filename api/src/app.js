@@ -113,7 +113,12 @@ app.get("/", (req, res) => {
   res.json({ message: "LinkyJob API running" });
 });
 app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
+  res.status(200).json({
+    status: "ok",
+    environment: process.env.NODE_ENV || "development",
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+  });
 });
 /* ==============================
    ERROR HANDLER
